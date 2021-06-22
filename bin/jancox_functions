@@ -1,5 +1,5 @@
 ####################################
-#         Kopi Functions           #
+#         Jancox Functions         #
 ####################################
 #          By : wahyu6070          #
 ####################################
@@ -10,35 +10,28 @@ print(){
 printlog(){
 	print "$1"
 	if [ "$1" != " " ]; then
-	print "$1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $log
-	print "$1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $loglive
+	print "$1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $LOG
 	else
-	print "$1" >> $log
-	print "$1" >> $loglive
+	print "$1" >> $LOG
 	fi
 	}
 sedlog(){
-	print "[Processing]  $1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $log
-	print "[Processing]  $1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $loglive
+	print "[Processing]  $1 [$(date '+%d/%m/%Y %H:%M:%S')]" >> $LOG
 	}
 	
 	
 #
 while_log(){
-	print "$1" | tee -a $log
+	print "$1" | tee -a $LOG
 	}
 listlog(){
-	print " " >> $log
-	print "▒▒▒▒▒▒▒▒▒▒▒▒▒ Folder List : $1 ▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $log
-	print " " >> $loglive
-	print "▒▒▒▒▒▒▒▒▒▒▒▒▒ Folder List : $1 ▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $loglive
+	print " " >> $LOG
+	print "▒▒▒▒▒▒▒▒▒▒▒▒▒ Folder List : $1 ▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $LOG
 	find "$1" -type f | while read lol; do
 	while_log "▒ $(du -sah $lol | cut -f 1) ▒ $lol"
-	done >> $loglive
-	print "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $log
-	print " " >> $log
-	print "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $loglive
-	print " " >> $loglive
+	done >/dev/null
+	print "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $LOG
+	print " " >> $LOG
 	}
 
 getp(){ grep "^$1" "$2" | head -n1 | cut -d = -f 2; }
@@ -134,12 +127,6 @@ BGBL='\e[1;30;47m'	# Background W Text Bl
 N='\e[0m'			# How to use (example): echo "${G}example${N}"
 }
 
-abort(){
-	print " " | tee -a $log | tee -a $loglive
-	print "!!! $1" | tee -a $log | tee -a $loglive
-	print " " | tee -a $log | tee -a $loglive
-	exit 1
-	}
 	
 #
 del (){ rm -rf "$@"; }
@@ -211,7 +198,28 @@ clog(){
 	}
 	
 	
-#dec
+ERROR(){
+	printlog " "
+	printlog " !!! < $1 > !!!"
+	exit 1
+	}
+check_python(){
+	if [ -f /data/data/com.termux/files/usr/bin/python ]; then
+	PY=/data/data/com.termux/files/usr/bin/python
+	else
+	printlog " "
+	printlog "$- python 3 Not Installed In Termux !"
+	printlog " "
+	printlog "- apt update"
+	printlog "- apt upgrade"
+	printlog "- pkg install python"
+	printlog " "
+	sleep 1s
+	exit 1
+	fi
+	
+	}
+#
 if [ $(uname -m) = *x86* ]; then
 ARCH32=x86
 else
@@ -220,3 +228,10 @@ fi
 
 #func active
 bash_color
+#
+#bin
+BIN=$jancox/bin/$ARCH32
+TMP=$jancox/bin/tmp
+PYBIN=$jancox/bin/python
+EDITOR=$jancox/editor
+LOG=$jancox/bin/jancox.log
