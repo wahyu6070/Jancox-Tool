@@ -7,9 +7,8 @@
 jancox=`dirname "$(readlink -f $0)"`
 #functions
 . $jancox/bin/jancox_functions
-chmod -R 755 $bin
 [ $(pwd) != $jancox ] && cd $jancox
-
+[ -f $LOG ] && del $log
 for W777 in $TMP $EDITOR; do
  [ -d $W777 ] && del $W777 && cdir $W777 || cdir $W777
 done
@@ -24,10 +23,8 @@ for ajax in $jancox /data/media/0 /data/media/0/Download; do
         break
      fi;
 done
+
 clear
-if [ ! -f $jancox/credits.txt ]; then
-ERROR "Please dont delete credits"
-fi
 printmid "${Y}Jancox Tool by wahyu6070${W}"
 printlog " "
 printlog "       Unpack"
@@ -102,13 +99,13 @@ fi
 
 if [ -f $TMP/vendor.img ]; then
 printlog "- Extraction vendor.img... "
-$py $pybin/imgextractor.py $TMP/vendor.img $EDITOR/vendor >/dev/null
+$PY $PYBIN/imgextractor.py $TMP/vendor.img $EDITOR/vendor >/dev/null
 del $TMP/vendor.img
 fi
 
 if [ -f $TMP/boot.img ]; then
 printlog "- Extraction boot.img"
-$bin/magiskboot unpack $TMP/boot.img  2>> $LOG
+$BIN/magiskboot unpack $TMP/boot.img  2>> $LOG
 cdir $EDITOR/boot
 for MV_BOOT in ramdisk.cpio kernel kernel_dtb dtb second; do
 [ -f $jancox/$MV_BOOT ] && mv -f $jancox/$MV_BOOT $EDITOR/boot/
@@ -132,12 +129,13 @@ test $payloadbin && del $TMP
 if [ -f $EDITOR/system/build.prop ]; then
 printlog "- Done "
 printlog " "
-rom-info $EDITOR > $editor/rom-info
+rom_info $EDITOR > $EDITOR/rom_info
+cat $EDITOR/rom_info
 elif [ -f $EDITOR/system/system/build.prop ]; then
 printlog "- Done"
 printlog " "
-rom-info $EDITOR > $editor/rom-info
-cat $EDITOR/rom-info
+rom_info $EDITOR > $EDITOR/rom_info
+cat $EDITOR/rom_info
 else
-printlog "- Finished with the problem"
+printlog "- Finished with problem"
 fi

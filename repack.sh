@@ -6,125 +6,179 @@
 #PATH
 jancox=`dirname "$(readlink -f $0)"`
 #functions
-. $jancox/bin/arm/kopi
-#bin
-bin=$jancox/bin/$ARCH32
-bb=$bin/busybox
-tmp=$jancox/bin/tmp
-pybin=$jancox/bin/python
-editor=$jancox/editor
-profile=$jancox/bin/jancox.prop
-log=$jancox/bin/jancox.log
-loglive=$jancox/bin/jancox.live.log
-chmod -R 755 $bin
+. $jancox/bin/jancox_functions
 
 clear
 [ $(pwd) != $jancox ] && cd $jancox
-del $loglive && touch $loglive
-if [ ! -d $editor/system ]; then printlog "     Please Unpack !!"; exit; fi
-mkdir -p $tmp
-mkdir -p $editor
-if [ -f /data/data/com.termux/files/usr/bin/python ]; then
-py=/data/data/com.termux/files/usr/bin/python
-else
-printlog " "
-printlog "- python 3 Not Installed In Termux !"
-printlog " "
-printlog "- apt update"
-printlog "- apt upgrade"
-printlog "- pkg install python"
-printlog " "
-sleep 1s
-exit
+del $LOG
+if [ ! -d $EDITOR/system ]; then 
+ERROR " Please Unpack"
 fi
+for W7878 in $TMP $EDITOR; do
+test ! -d $W7878 && cdir $W7878
+done
+
+check_python
+
 printmid "${Y}Jancox Tool by wahyu6070${W}"
 printlog "       Repack "
 printlog " "
-rom-info $editor
+rom_info $EDITOR
 printlog " "
-[ ! -d $tmp ] && mkdir $tmp
 
-if [[ $(getp set.time $profile) == true ]]; then
-setime -r $editor/system $(getp setime.date)
-setime -r $editor/vendor $(getp setime.date)
+if [[ $(get_config set.time) == true ]]; then
+setime -r $EDITOR/system $(getp setime.date)
+setime -r $EDITOR/vendor $(getp setime.date)
 fi
 
-if [ -d $editor/system ]; then
+if [ -d $EDITOR/system9 ]; then
 printlog "- Repack system"
-size1=`$bb du -sk $editor/system | $bb awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
-$bin/make_ext4fs -s -L system -T 2009110000 -S $editor/system_file_contexts -C $editor/system_fs_config -l $size1 -a system $tmp/system.img $editor/system/ >> $loglive
-sedlog "system size = $size1"
+if [ -f $EDITOR/system/system/build.prop ]; then
+SYSDIR=$EDITOR/system/system
+else
+SYSDIR=$EDITOR/system
+fi
+	if [ -f $SYSDIR/etc/selinux/plat_file_contexts ]; then
+	[ -f "$TMP/system_file_contexts" ] && del "$TMP/system_file_contexts"
+	echo "/firmware(/.*)?         u:object_r:firmware_file:s0" >> "$TMP/system_file_contexts"
+    echo "/bt_firmware(/.*)?      u:object_r:bt_firmware_file:s0" >> "$TMP/system_file_contexts"
+    echo "/persist(/.*)?          u:object_r:mnt_vendor_file:s0" >> "$TMP/system_file_contexts"
+    echo "/dsp                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/oem                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/op1                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/op2                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/charger_log            u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/audit_filter_table     u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/keydata                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/keyrefuge              u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/omr                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/publiccert.pem         u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/sepolicy_version       u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/cust                   u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/donuts_key             u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/v_key                  u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/carrier                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/dqmdbg                 u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/ADF                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/APD                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/asdf                   u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/batinfo                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/voucher                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/xrom                   u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/custom                 u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/cpefs                  u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/modem                  u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/module_hashes          u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/pds                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/tombstones             u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/factory                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/oneplus(/.*)?          u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/addon.d                u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/op_odm                 u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    echo "/avb                    u:object_r:rootfs:s0" >> "$TMP/system_file_contexts"
+    cat $SYSDIR/etc/selinux/plat_file_contexts >> "$TMP/system_file_contexts"
+    SYSTEM_FILE_CONTEXTS="$TMP/system_file_contexts"
+	elif [ -f $EDITOR/system_file_contexts ]; then
+		SYSTEM_FILE_CONTEXTS=$EDITOR/system_file_contexts
+	else
+		ERROR "system file contexts not found"
+	fi
+	if [ -f $EDITOR/system_size.txt ]; then
+		SYSTEM_SIZE=`cat $EDITOR/system_size.txt`
+	else
+		SYSTEM_SIZE=`$BIN/busybox du -sk $EDITOR/system | $BIN/busybox awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
+	fi
+$BIN/make_ext4fs -T 0 -S $SYSTEM_FILE_CONTEXTS -l $SYSTEM_SIZE -L system -a system -s $TMP/system.img $EDITOR/system
+[ -f "$TMP/system_file_contexts" ] && del "$TMP/system_file_contexts"
+sedlog "System size = $SYSTEM_SIZE"
 fi
 
-if [ -d $editor/vendor ]; then
-printlog "- Repack vendor"
-size2=`$bb du -sk $editor/vendor | $bb awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
-$bin/make_ext4fs -s -L vendor -T 2009110000 -S $editor/vendor_file_contexts -C $editor/vendor_fs_config -l $size2 -a vendor $tmp/vendor.img $editor/vendor/ >> $loglive
-sedlog "vendor size = $size2"
+if [ -d $EDITOR/vendor ]; then
+	printlog "- Repack vendor"
+	if [ -f $EDITOR/vendor_file_contexts ]; then
+		VENDOR_FILE_CONTEXTS=$EDITOR/vendor_file_contexts
+	elif [ -f $EDITOR/vendor/etc/selinux/vendor_file_contexts ]; then
+		[ -f "$TMP/vendor_file_contexts" ] && del "$TMP/vendor_file_contexts"
+		cat $EDITOR/vendor/etc/selinux/vendor_file_contexts >> "$TMP/vendor_file_contexts"
+    	VENDOR_FILE_CONTEXTS="$TMP/vendor_file_contexts"
+	else
+		ERROR "vendor file contexts not found"
+	fi
+	if [ -f $EDITOR/vendor_size.txt ]; then
+		VENDOR_SIZE=`cat $EDITOR/vendor_size.txt`
+	else
+		VENDOR_SIZE=`$BIN/busybox du -sk $EDITOR/vendor | $BIN/busybox awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
+	fi
+$BIN/make_ext4fs -T 0 -S $VENDOR_FILE_CONTEXTS -l $VENDOR_SIZE -L vendor -a vendor -s $TMP/vendor.img $EDITOR/vendor
+#[ -f "$TMP/vendor_file_contexts" ] && del "$TMP/vendor_file_contexts"
+sedlog "Vendor size = $VENDOR_SIZE"
 fi;
 
 
-if [ -f $tmp/system.img ] && [ $(getp compress.dat $profile) = true ]; then
+if [ -f $TMP/system.img ] && [ $(get_config compress.dat) = true ]; then
 printlog "- Repack system.img"
-[ -f $tmp/system.new.dat ] && rm -rf $tmp/system.new.dat
-$py $pybin/img2sdat.py $tmp/system.img -o $tmp -v 4 >> $loglive
-[ -f $tmp/system.img ] && rm -rf $tmp/system.img
+[ -f $TMP/system.new.dat ] && rm -rf $TMP/system.new.dat
+$PY $PYBIN/img2sdat.py $TMP/system.img -o $TMP -v 4 >> $LOG
+[ -f $TMP/system.img ] && rm -rf $TMP/system.img
 fi
 
-if [ -f $tmp/vendor.img ] && [ $(getp compress.dat $profile) = true ]; then
+if [ -f $TMP/vendor.img ] && [ $(get_config compress.dat) = true ]; then
 printlog "- Repack vendor.img"
-[ -f $tmp/vendor.new.dat ] && rm -rf $tmp/vendor.new.dat
-$py $pybin/img2sdat.py $tmp/vendor.img -o $tmp -v 4 -p vendor >> $loglive
-[ -f $tmp/vendor.img ] && rm -rf $tmp/vendor.img
+[ -f $TMP/vendor.new.dat ] && rm -rf $TMP/vendor.new.dat
+$PY $PYBIN/img2sdat.py $TMP/vendor.img -o $TMP -v 4 -p vendor >> $LOG
+[ -f $TMP/vendor.img ] && rm -rf $TMP/vendor.img
 fi
 
 #level brotli
-case $(getp brotli.level $jancox/bin/jancox.prop) in
-1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 ) brlvl=`getp brotli.level $jancox/bin/jancox.prop` ;;
-*) brlvl=1 ;;
+case $(get_config brotli.level) in
+1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 ) brlvl=`get_config brotli.level`
+;;
+*) brlvl=1
+;;
 esac
+exit 0
 sedlog "- Brotli level : $brlvl"
-if [ -f $tmp/system.new.dat ]; then
+if [ -f $TMP/system.new.dat ]; then
 printlog "- Repack system.new.dat"
-[ -f $tmp/system.new.dat.br ] && rm -rf $tmp/system.new.dat.br
-$bin/brotli -$brlvl -j -w 24 $tmp/system.new.dat >> $loglive
+[ -f $TMP/system.new.dat.br ] && rm -rf $TMP/system.new.dat.br
+$BIN/brotli -$brlvl -j -w 24 $TMP/system.new.dat >> $LOG
 fi
 
-if [ -f $tmp/vendor.new.dat ]; then
-[ -f $tmp/vendor.new.dat.br ] && rm -rf $tmp/vendor.new.dat.br
+if [ -f $TMP/vendor.new.dat ]; then
+[ -f $TMP/vendor.new.dat.br ] && rm -rf $TMP/vendor.new.dat.br
 printlog "- Repack vendor.new.dat"
-$bin/brotli -$brlvl -j -w 24 $tmp/vendor.new.dat >> $loglive
+$BIN/brotli -$brlvl -j -w 24 $TMP/vendor.new.dat >> $LOG
 fi
 
-if [ -d $editor/boot ] && [ -f $editor/boot/boot.img ]; then
+if [ -d $EDITOR/boot ] && [ -f $EDITOR/boot/boot.img ]; then
 printlog "- Repack boot"
 for BOOT_FILES in kernel kernel_dtb ramdisk.cpio second; do
-[ -f $editor/boot/$BOOT_FILES ] && cp -f $editor/boot/$BOOT_FILES $jancox
-sedlog "- Moving boot file $editor/boot/$BOOT_FILES to $jancox"
+[ -f $EDITOR/boot/$BOOT_FILES ] && cp -f $EDITOR/boot/$BOOT_FILES $jancox
+sedlog "- Moving boot file $EDITOR/boot/$BOOT_FILES to $jancox"
 done
-$bin/magiskboot repack $editor/boot/boot.img 2>> $loglive
+$BIN/magiskboot repack $EDITOR/boot/boot.img 2>> $LOG
 sleep 1s
-[ -f $jancox/new-boot.img ] && mv -f $jancox/new-boot.img $tmp/boot.img
+[ -f $jancox/new-boot.img ] && mv -f $jancox/new-boot.img $TMP/boot.img
 for RM_BOOT_FILES in kernel kernel_dtb ramdisk.cpio second; do
-test -f $jancox/$RM_BOOT_FILES && rm -rf $jancox/$RM_BOOT_FILES
+test -f $jancox/$RM_BOOT_FILES && del $jancox/$RM_BOOT_FILES
 sedlog "- Removing boot file $janxoz$RM_BOOT_FILES"
 done
 fi
 
-[ -d $editor/META-INF ] && cp -a $editor/META-INF $tmp/
-[ -d $editor/install ] && cp -a $editor/install $tmp/
-[ -d $editor/system2 ] && cp -a $editor/system2 $tmp/system
-[ -d $editor/firmware-update ] && cp -a $editor/firmware-update $tmp/
-[ -f $editor/compatibility.zip ] && cp -f $editor/compatibility.zip $tmp/
-[ -f $editor/compatibility_no_nfc.zip ] && cp -f $editor/compatibility_no_nfc.zip $tmp/
+[ -d $EDITOR/META-INF ] && cp -a $EDITOR/META-INF $TMP/
+[ -d $EDITOR/install ] && cp -a $EDITOR/install $TMP/
+[ -d $EDITOR/system2 ] && cp -a $EDITOR/system2 $TMP/system
+[ -d $EDITOR/firmware-update ] && cp -a $EDITOR/firmware-update $TMP/
+[ -f $EDITOR/compatibility.zip ] && cp -f $EDITOR/compatibility.zip $TMP/
+[ -f $EDITOR/compatibility_no_nfc.zip ] && cp -f $EDITOR/compatibility_no_nfc.zip $TMP/
 
-if [ -d $tmp/META-INF ] && [ $(getp zipping $profile) = true ]; then
+if [ -d $TMP/META-INF ] && [ $(get_config zipping) = true ]; then
 printlog "- Zipping"
 ZIPNAME=`echo "new-rom_$(date +%Y-%m-%d)"`
-[ $(getp zip.level $jancox/bin/jancox.prop) -le 9 ] && ZIPLEVEL=`getp zip.level $jancox/bin/jancox.prop` || ZIPLEVEL=1
+[ $(get_config zip.level) -le 9 ] && ZIPLEVEL=`get_config zip.level` || ZIPLEVEL=1
 [ -f ${ZIPNAME}.zip ] && del ${ZIPNAME}.zip
-cd $tmp
-$bin/zip -r${ZIPLEVEL} $jancox/"${ZIPNAME}.zip" . >> $loglive || sedlog "Failed creating $jancox/${zipname}.zip"
+cd $TMP
+$BIN/zip -r${ZIPLEVEL} $jancox/"${ZIPNAME}.zip" . >> $loglive || sedlog "Failed creating $jancox/${zipname}.zip"
 sedlog "ZIP NAME  : ${ZIPNAME}.zip"
 sedlog "ZIP LEVEL : ${ZIPLEVEL}"
 cd $jancox
@@ -133,10 +187,10 @@ fi
 
 if [ -f "${ZIPNAME}.zip" ]; then
       printlog "- Repack done"
-      del $tmp
+      del $TMP
 else
       printlog "- Repack error"
-      del $tmp
+      del $TMP
 fi
 
 clog

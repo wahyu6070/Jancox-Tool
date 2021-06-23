@@ -15,6 +15,8 @@
 ## Guide 2
 - open file manager support execute script example ( root explore,mixplore,etc) 
 - execute ``unpack.sh`` in /data/local/jancox-tool
+## Jancox Prop /data/local/jancox-tool/bin/jancox.prop
+- set config 
 ## Jancox Menu
 - Open terminal
 - ``jancoxmenu``

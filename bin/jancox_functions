@@ -28,7 +28,7 @@ listlog(){
 	print " " >> $LOG
 	print "▒▒▒▒▒▒▒▒▒▒▒▒▒ Folder List : $1 ▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $LOG
 	find "$1" -type f | while read lol; do
-	while_log "▒ $(du -sah $lol | cut -f 1) ▒ $lol"
+	while_log "▒ $(du -sh $lol | cut -f 1) ▒ $lol"
 	done >/dev/null
 	print "▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒" >> $LOG
 	print " " >> $LOG
@@ -134,7 +134,7 @@ cdir (){ mkdir -p "$@"; }
 
 
 #jancox
-rom-info (){
+rom_info(){
 	editor2=$1
 if [ -f $editor2/system/system/build.prop ]; then
 system=system/system
@@ -146,7 +146,7 @@ fi;
 
 test ! -f $editor2/$system/build.prop && return 1
 
-if [ -d $editor2/vendor ]; then
+if [ -f $editor2/vendor/build.prop ]; then
 	for GREP_VERITY in forceencrypt forcefdeorfbe fileencryption .dmverity=true fileencryption; do
 		[[ "$(grep $GREP_VERITY $editor2/vendor/etc/fstab.qcom)" ]] && DMVERITY=true || DMVERITY=false
 	done
@@ -192,15 +192,22 @@ clog(){
 	fi
 	[ -f $jancox/bin/jancox_log.tar.gz ] && del $jancox/bin/jancox_log.tar.gz
 	cd  $jancox/bin/log
-	$bin/busybox tar -cz -f $jancox/bin/jancox_log.tar.gz * || sedlog "Failed Creating jancox_log.tar.gz"
+	$BIN/busybox tar -cz -f $jancox/bin/jancox_log.tar.gz * || sedlog "Failed Creating jancox_log.tar.gz"
 	del $jancox/bin/log
 	cd $jancox
 	}
 	
 	
+ABORT(){
+	print " "
+	print " !!! < $1 > !!!"
+	print " "
+	exit 1
+	}
 ERROR(){
 	printlog " "
 	printlog " !!! < $1 > !!!"
+	printlog " "
 	exit 1
 	}
 check_python(){
@@ -208,7 +215,7 @@ check_python(){
 	PY=/data/data/com.termux/files/usr/bin/python
 	else
 	printlog " "
-	printlog "$- python 3 Not Installed In Termux !"
+	printlog "- python 3 Not Installed In Termux !"
 	printlog " "
 	printlog "- apt update"
 	printlog "- apt upgrade"
@@ -219,15 +226,25 @@ check_python(){
 	fi
 	
 	}
-#
+check_credits(){
+	if [ ! -f $jancox/credits.txt ]; then
+		clear
+		ABORT "Please dont delete credits"
+	fi
+	}
+get_config(){
+	getp "$1" $jancox/bin/jancox.prop
+	}
 if [ $(uname -m) = *x86* ]; then
 ARCH32=x86
 else
 ARCH32=arm
 fi
 
+
 #func active
 bash_color
+check_credits
 #
 #bin
 BIN=$jancox/bin/$ARCH32
@@ -235,3 +252,4 @@ TMP=$jancox/bin/tmp
 PYBIN=$jancox/bin/python
 EDITOR=$jancox/editor
 LOG=$jancox/bin/jancox.log
+chmod -R 755 $BIN
