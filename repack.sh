@@ -31,7 +31,7 @@ setime -r $EDITOR/system $(getp setime.date)
 setime -r $EDITOR/vendor $(getp setime.date)
 fi
 
-if [ -d $EDITOR/system9 ]; then
+if [ -d $EDITOR/system ]; then
 printlog "- Repack system"
 if [ -f $EDITOR/system/system/build.prop ]; then
 SYSDIR=$EDITOR/system/system
@@ -131,12 +131,13 @@ fi
 
 #level brotli
 case $(get_config brotli.level) in
-1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 ) brlvl=`get_config brotli.level`
+1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 )
+brlvl=`get_config brotli.level`
 ;;
 *) brlvl=1
 ;;
 esac
-exit 0
+
 sedlog "- Brotli level : $brlvl"
 if [ -f $TMP/system.new.dat ]; then
 printlog "- Repack system.new.dat"
@@ -178,7 +179,7 @@ ZIPNAME=`echo "new-rom_$(date +%Y-%m-%d)"`
 [ $(get_config zip.level) -le 9 ] && ZIPLEVEL=`get_config zip.level` || ZIPLEVEL=1
 [ -f ${ZIPNAME}.zip ] && del ${ZIPNAME}.zip
 cd $TMP
-$BIN/zip -r${ZIPLEVEL} $jancox/"${ZIPNAME}.zip" . >> $loglive || sedlog "Failed creating $jancox/${zipname}.zip"
+$BIN/zip -r${ZIPLEVEL} $jancox/"${ZIPNAME}.zip" . >> $LOG || sedlog "Failed creating $jancox/${zipname}.zip"
 sedlog "ZIP NAME  : ${ZIPNAME}.zip"
 sedlog "ZIP LEVEL : ${ZIPLEVEL}"
 cd $jancox
