@@ -4,3 +4,6 @@ compress.dat=true
 brotli.level=1
 set.time=false
 setime.date=200901011500
+img.extractor=old
+img.ab=A
+img.make=new

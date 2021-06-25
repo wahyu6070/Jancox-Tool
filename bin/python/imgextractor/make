@@ -1,0 +1,17 @@
+BASED=`dirname $(readlink -f $0)`
+
+PYTHON=$1
+TYPE=$2
+INPUT=$3
+OUTPUT=$4
+if [ "$TYPE" = old ]; then
+$PYTHON $BASED/old/imgextractor.py $INPUT $OUTPUT
+elif [ $TYPE = new ]; then
+$PYTHON $BASED/new/ext4extract.py -D $OUTPUT $INPUT
+fi
+echo " "
+echo "PYTHON = $PYTHON"
+echo "TYPE = $TYPE"
+echo "INPUT = $INPUT"
+echo "OUTPUT = $OUTPUT"
+echo " "

@@ -68,38 +68,46 @@ fi
 
 if [ -f $TMP/system.new.dat ]; then
 printlog "- Extraction system.new.dat... "
-$PY $PYBIN/sdat2img.py $TMP/system.transfer.list $TMP/system.new.dat $TMP/system.img >> $LOG
+$PY $PYBIN/sdat2img/sdat2img.py $TMP/system.transfer.list $TMP/system.new.dat $TMP/system.img >> $LOG
 del $TMP/system.new.dat $TMP/system.transfer.list
 fi
 
 if [ -f $TMP/product.new.dat ]; then
 printlog "- Extraction product.new.dat... "
-$PY $PYBIN/sdat2img.py $TMP/product.transfer.list $TMP/product.new.dat $TMP/product.img >> $LOG
+$PY $PYBIN/sdat2img/sdat2img.py $TMP/product.transfer.list $TMP/product.new.dat $TMP/product.img >> $LOG
 del $TMP/product.new.dat $TMP/product.transfer.list
 fi
 
 if [ -f $TMP/vendor.new.dat ]; then
 printlog "- Extraction vendor.new.dat... "
-$PY $PYBIN/sdat2img.py $TMP/vendor.transfer.list $TMP/vendor.new.dat $TMP/vendor.img >> $LOG
+$PY $PYBIN/sdat2img/sdat2img.py $TMP/vendor.transfer.list $TMP/vendor.new.dat $TMP/vendor.img >> $LOG
 del $TMP/vendor.new.dat $TMP/vendor.transfer.list
 fi
 
+
+if [ $(get_config img.extractor) == old ]; then
+PYIMGEX="sh $PYBIN/imgextractor/make $PY old"
+sedlog "Extract img using new"
+else
+PYIMGEX="sh $PYBIN/imgextractor/make $PY new"
+sedlog "Extract img using new"
+fi
 if [ -f $TMP/system.img ]; then
 printlog "- Extraction system.img... "
-$PY $PYBIN/imgextractor.py $TMP/system.img $EDITOR/system >> $LOG
+$PYIMGEX $TMP/system.img $EDITOR/system >> $LOG
 del $TMP/system.img
 fi
 
 if [ -f $TMP/product.img ]; then
 printlog "- Extraction product.img... "
 mv $TMP/product.img $TMP/system.img
-$PY $PYBIN/imgextractor.py $TMP/system.img $EDITOR/product >> $LOG
+$PYIMGEX $TMP/system.img $EDITOR/product $LOG
 del $TMP/system.img
 fi
 
 if [ -f $TMP/vendor.img ]; then
 printlog "- Extraction vendor.img... "
-$PY $PYBIN/imgextractor.py $TMP/vendor.img $EDITOR/vendor >/dev/null
+$PYIMGEX $TMP/vendor.img $EDITOR/vendor >> $LOG
 del $TMP/vendor.img
 fi
 

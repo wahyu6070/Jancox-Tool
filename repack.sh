@@ -31,6 +31,21 @@ setime -r $EDITOR/system $(getp setime.date)
 setime -r $EDITOR/vendor $(getp setime.date)
 fi
 
+
+
+#
+if [ $(get_config img.make) = old ]; then
+	TYPE_MAKE=old
+else
+	TYPE_MAKE=new
+fi
+sedlog "Type make img <$TYPE_MAKE>"
+case $(get_config img.ab) in
+ab | AB) AB=AB ;;
+*) AB=A ;;
+esac
+sedlog "Type AB <$AB>"
+MAKE_IMG=". $jancox/bin/script/make_img/mdroidimage.sh"
 if [ -d $EDITOR/system ]; then
 printlog "- Repack system"
 if [ -f $EDITOR/system/system/build.prop ]; then
@@ -88,9 +103,9 @@ fi
 	else
 		SYSTEM_SIZE=`$BIN/busybox du -sk $EDITOR/system | $BIN/busybox awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
 	fi
-$BIN/make_ext4fs -T 0 -S $SYSTEM_FILE_CONTEXTS -l $SYSTEM_SIZE -L system -a system -s $TMP/system.img $EDITOR/system
-[ -f "$TMP/system_file_contexts" ] && del "$TMP/system_file_contexts"
-sedlog "System size = $SYSTEM_SIZE"
+	$MAKE_IMG -t $TYPE_MAKE -a $AB -s $SYSTEM_SIZE -f $SYSTEM_FILE_CONTEXTS -p system -i $EDITOR/system -o  $TMP/system.img >> $LOG
+	[ -f "$TMP/system_file_contexts" ] && del "$TMP/system_file_contexts"
+	sedlog "System size = $SYSTEM_SIZE"
 fi
 
 if [ -d $EDITOR/vendor ]; then
@@ -109,24 +124,24 @@ if [ -d $EDITOR/vendor ]; then
 	else
 		VENDOR_SIZE=`$BIN/busybox du -sk $EDITOR/vendor | $BIN/busybox awk '{$1*=1024;$1=int($1*1.05);printf $1}'`
 	fi
-$BIN/make_ext4fs -T 0 -S $VENDOR_FILE_CONTEXTS -l $VENDOR_SIZE -L vendor -a vendor -s $TMP/vendor.img $EDITOR/vendor
-#[ -f "$TMP/vendor_file_contexts" ] && del "$TMP/vendor_file_contexts"
-sedlog "Vendor size = $VENDOR_SIZE"
+	$MAKE_IMG -t $TYPE_MAKE -a $AB -s $VENDOR_SIZE -f $VENDOR_FILE_CONTEXTS -p vendor -i $EDITOR/vendor -o  $TMP/vendor.img >> $LOG
+	[ -f "$TMP/vendor_file_contexts" ] && del "$TMP/vendor_file_contexts"
+	sedlog "Vendor size = $VENDOR_SIZE"
 fi;
 
 
 if [ -f $TMP/system.img ] && [ $(get_config compress.dat) = true ]; then
-printlog "- Repack system.img"
-[ -f $TMP/system.new.dat ] && rm -rf $TMP/system.new.dat
-$PY $PYBIN/img2sdat.py $TMP/system.img -o $TMP -v 4 >> $LOG
-[ -f $TMP/system.img ] && rm -rf $TMP/system.img
+	printlog "- Repack system.img"
+	[ -f $TMP/system.new.dat ] && rm -rf $TMP/system.new.dat
+	$PY $PYBIN/img2sdat/img2sdat.py $TMP/system.img -o $TMP -v 4 >> $LOG
+	[ -f $TMP/system.img ] && rm -rf $TMP/system.img
 fi
 
 if [ -f $TMP/vendor.img ] && [ $(get_config compress.dat) = true ]; then
-printlog "- Repack vendor.img"
-[ -f $TMP/vendor.new.dat ] && rm -rf $TMP/vendor.new.dat
-$PY $PYBIN/img2sdat.py $TMP/vendor.img -o $TMP -v 4 -p vendor >> $LOG
-[ -f $TMP/vendor.img ] && rm -rf $TMP/vendor.img
+	printlog "- Repack vendor.img"
+	[ -f $TMP/vendor.new.dat ] && del $TMP/vendor.new.dat
+	$PY $PYBIN/img2sdat/img2sdat.py $TMP/vendor.img -o $TMP -v 4 -p vendor >> $LOG
+	[ -f $TMP/vendor.img ] && del $TMP/vendor.img
 fi
 
 #level brotli
@@ -191,7 +206,6 @@ if [ -f "${ZIPNAME}.zip" ]; then
       del $TMP
 else
       printlog "- Repack error"
-      del $TMP
 fi
 
 clog

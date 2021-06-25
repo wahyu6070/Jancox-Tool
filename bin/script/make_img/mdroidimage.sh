@@ -1,5 +1,6 @@
 #!/system/bin/sh
 # Make android image by wahyu6070
+MAKE_EXT4FS=$BIN/make_ext4fs
 MKE2FS=mke2fs
 E2FSDROID=e2fsdroid
 BLOCKSIZE=4096
@@ -52,13 +53,27 @@ ABOUT(){
 	fi
 	
 	SIZECON=$((SIZE / BLOCKSIZE))
+	echo "TYPE : $TYPE"
+	echo "AB   : $SYEMLESS"
+	echo "FILE CONTEXTS : $FILE_CONTEXTS"
+	echo "PARTITIONS : $PARTITIONS"
+	echo "SIZE CONVERT : $SIZECON"
+	echo "BLOCK SIZE : $BLOCKSIZE"
+	echo "INPUT : $INPUT"
+	echo "OUTPUT : $OUTPUT"
+	echo "EXECUTABLE MAKE_EXT4FS : $(command -v $MAKE_EXT4FS)"
+	echo "EXECUTABLE MKE2FS : $(command -v $MKE2FS)"
+	echo "EXECUTABLE E2FSDROID : $(command -v $E2FSDROID)"
 	if [[ $TYPE == old ]]; then
-		echo
-	elif [[ $TYPE == new ]]; then
 		if [[ $SYEMLESS == A ]]; then
-			$MKE2FS -L $PARTITIONS -E android_sparse -t ext4 -b $BLOCKSIZE "$OUTPUT" $SIZECON
-			$E2FSDROID -T 0 -S $FILE_CONTEXTS -f $INPUT -a /$PARTITIONS $OUTPUT
-			echo "$E2FSDROID -T 0 -S $FILE_CONTEXTS -f $INPUT -a /$PARTITIONS $OUTPUT"
+			$MAKE_EXT4FS -T 0 -S $FILE_CONTEXTS -l $SIZECON -L $PARTITIONS -a $PARTITIONS -s $OUTPUT $INPUT 2>/dev/null
+		elif [[ $SYEMLESS == AB ]]; then
+			echo
+		fi
+	elif [[ $TYPE == new ]]; then
+		if [[ $SYEMLESS == A ]]; then 
+			$MKE2FS -L $PARTITIONS -E android_sparse -t ext4 -b $BLOCKSIZE "$OUTPUT" $SIZECON 2>/dev/null
+			$E2FSDROID -T 0 -S $FILE_CONTEXTS -f $INPUT -a /$PARTITIONS $OUTPUT 2>/dev/null
 		elif [[ $SYEMLESS = AB ]]; then
 		echo 
 		fi
